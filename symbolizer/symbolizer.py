@@ -22,11 +22,15 @@ from pylint import lint
 
 class Symbolizer(object):
 
-    def __init__(self, start_location=os.getcwd(), column_width=79):
+    def __init__(
+        self, start_location=os.getcwd(), column_width=79, handle_inline=False
+    ):
         self.start_location = start_location
         self.column_width = column_width
-        self.mapping = self._initalize_mapping()
+        self.handle_inline = handle_inline
+
         self.pylint_disable = '# pylint: disable='
+        self.mapping = self._initalize_mapping()
         self.pattern = re.compile(
             r'\b(' + '|'.join(self.mapping.keys()) + r')\b'
         )
@@ -153,3 +157,19 @@ class Symbolizer(object):
             line_list.insert(0, self.pylint_disable)
 
             return line_list
+
+    def _leading_whitespace(self, line):
+        """
+        Get the leading whitespace and append either four spaces to the
+        whitespace or a tab for the next logical line
+
+        :param line: A string to with leading whitespace
+        :rtype: str
+        """
+        indentation = ' ' * 4
+
+        whitespace = line[:-len(line.lstrip())]
+        if '\t' in whitespace:
+            indentation = '\t'
+
+        return whitespace + indentation

@@ -65,11 +65,27 @@ def test_check_line_length():
         'too-many-public-methods,W07030,deprecated-module,'
         'too-many-lines,old-style-class,fixme'
     )
-    # XXX Fix trailing comma in the second line
     expected = (
         '# pylint: disable=too-many-instance-attributes,'
-        'too-many-public-methods,W07030\n# pylint: disable=,'
+        'too-many-public-methods,W07030\n# pylint: disable='
         'deprecated-module,too-many-lines,old-style-class,fixme'
+    )
+    ret_val = Symbolizer()._check_line_length(line)
+    assert_equals(ret_val, expected)
+
+
+def test_check_line_length_inline():
+    line = (
+        "        def foo(self, bar):  # pylint disable="
+        "too-many-instance-attributes,too-many-public-methods,W07030,"
+        "deprecated-module,too-many-lines,old-style-class,fixme"
+    )
+    expected = (
+        "        def foo(self, bar):\n"
+        "            # pylint: disable=too-many-instance-attributes\n"
+        "            # pylint: disable=too-many-public-methods,W07030,"
+        "deprecated-module\n"
+        "            # pylint: disable=too-many-lines,old-style-class,fixme"
     )
     ret_val = Symbolizer()._check_line_length(line)
     assert_equals(ret_val, expected)
