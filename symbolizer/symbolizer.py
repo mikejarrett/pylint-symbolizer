@@ -52,9 +52,9 @@ class Symbolizer(object):
         return mapping
 
     def __call__(self):
-        self.perform_symbolizer_checker()
+        self.perform_symbolizer_check()
 
-    def _build_files_list(self):
+    def _get_files(self):
         """
         Generates a list of files with extension in the directory structure
 
@@ -65,13 +65,13 @@ class Symbolizer(object):
                 if file_.endswith('.py'):
                     yield "{0}/{1}".format(dirpath, file_)
 
-    def perform_symbolizer_checker(self):
+    def perform_symbolizer_check(self):  # pragma: no cover
         """
         Cycle through python files, reading the contents and processing each
         line and writing out to the same file
         """
-        for filename in self._build_files_list():
-            print(u"Processing file -- {0}".format(filename))
+        for filename in self._get_files():
+            print u"Processing file -- {0}".format(filename)
             updated_file_text = u''
             with open(filename, 'r') as fin:
                 for line in fin.readlines():
@@ -129,9 +129,6 @@ class Symbolizer(object):
                     count += len(item)
                 else:
                     second_line.append(item)
-
-            if first_line and not second_line:
-                return ','.join(first_line)
 
             if first_line and second_line:
                 new_line = ','.join(first_line).replace('=,', '=')

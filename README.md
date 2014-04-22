@@ -10,4 +10,6 @@ TODO
 
 [ ] Handle inline disables
 
+[ ] Fix bug with trailing comma when adding a new line
+
 [ ] Cleanup `setup.py` and prep for PyPI
