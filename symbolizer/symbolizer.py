@@ -29,10 +29,10 @@ class Symbolizer(object):
         self.column_width = column_width
         self.handle_inline = handle_inline
 
-        self._pylint_disable = '# pylint: disable='
+        self._pylint_disable = u'# pylint: disable='
         self._mapping = self._initalize_mapping()
         self._pattern = re.compile(
-            r'\b(' + '|'.join(self._mapping.keys()) + r')\b'
+            ur'\b(' + '|'.join(self._mapping.keys()) + ur')\b'
         )
         self._leading_whitespace = 0
 
@@ -67,7 +67,7 @@ class Symbolizer(object):
         """
         for dirpath, __, filenames in os.walk(self.start_location):
             for file_ in filenames:
-                if file_.endswith('.py'):
+                if file_.endswith(u'.py'):
                     yield "{0}/{1}".format(dirpath, file_)
 
     def perform_symbolization(self):  # pragma: no cover
@@ -131,7 +131,7 @@ class Symbolizer(object):
             count = 0
             first_line_lst = []
             second_line_lst = []
-            for item in line.split(','):
+            for item in line.split(u','):
                 if count + len(item) < self.column_width:
                     first_line_lst.append(item)
                     count += len(item)
@@ -142,7 +142,7 @@ class Symbolizer(object):
                 return self._build_stuff(first_line_lst, second_line_lst)
 
     def _build_stuff(self, first_line_lst, second_line_lst):
-        new_line = ','.join(first_line_lst)
+        new_line = u','.join(first_line_lst)
 
         second_line_lst = self._insert_pylint_disable(second_line_lst)
         second_line_lst = self._insert_leading_whitespace(
@@ -150,7 +150,7 @@ class Symbolizer(object):
 
         second_line = self._check_line_length(','.join(second_line_lst))
         second_line = second_line.replace(u'disable=,', 'disable=')
-        new_line = '{0}\n{1}'.format(
+        new_line = u'{0}\n{1}'.format(
             new_line, second_line
         )
 
@@ -181,7 +181,7 @@ class Symbolizer(object):
         :rtpe: list
         """
         if self.handle_inline and self._leading_whitespace:
-            line_list[0] = '{0}{1}'.format(
+            line_list[0] = u'{0}{1}'.format(
                 self._leading_whitespace, line_list[0]
             )
 
@@ -199,10 +199,10 @@ class Symbolizer(object):
         indentation = u''
 
         if line.index(self._pylint_disable):
-            indentation = ' ' * 4
+            indentation = u' ' * 4
             whitespace = line[:-len(line.lstrip())]
-            if '\t' in whitespace:
-                indentation = '\t'
+            if u'\t' in whitespace:
+                indentation = u'\t'
 
         self._leading_whitespace = whitespace + indentation
 
