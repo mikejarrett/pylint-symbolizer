@@ -76,22 +76,24 @@ def test_check_line_length():
 
 def test_check_line_length_inline():
     line = (
-        "        def foo(self, bar):  # pylint disable="
+        "        def foo(self, bar):  # pylint: disable="
         "too-many-instance-attributes,too-many-public-methods,W07030,"
         "deprecated-module,too-many-lines,old-style-class,fixme"
     )
     expected = (
-        "        def foo(self, bar):\n"
-        "            # pylint: disable=too-many-instance-attributes\n"
+        "        def foo(self, bar):  # pylint: disable="
+        "too-many-instance-attributes\n"
         "            # pylint: disable=too-many-public-methods,W07030,"
         "deprecated-module\n"
         "            # pylint: disable=too-many-lines,old-style-class,fixme"
     )
-    ret_val = Symbolizer()._check_line_length(line)
+    symb = Symbolizer(handle_inline=True)
+    symb._set_leading_whitespace(line)
+    ret_val = symb._check_line_length(line)
     assert_equals(ret_val, expected)
 
 
-@mock.patch('symbolizer.symbolizer.Symbolizer.perform_symbolizer_check')
-def test_call(perform_symbolizer_check):
+@mock.patch('symbolizer.symbolizer.Symbolizer.perform_symbolization')
+def test_call(perform_symbolization):
     Symbolizer()()
-    assert_equals(perform_symbolizer_check.call_count, 1)
+    assert_equals(perform_symbolization.call_count, 1)

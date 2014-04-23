@@ -29,11 +29,12 @@ class Symbolizer(object):
         self.column_width = column_width
         self.handle_inline = handle_inline
 
-        self.pylint_disable = '# pylint: disable='
-        self.mapping = self._initalize_mapping()
-        self.pattern = re.compile(
-            r'\b(' + '|'.join(self.mapping.keys()) + r')\b'
+        self._pylint_disable = '# pylint: disable='
+        self._mapping = self._initalize_mapping()
+        self._pattern = re.compile(
+            r'\b(' + '|'.join(self._mapping.keys()) + r')\b'
         )
+        self._leading_whitespace = 0
 
     @staticmethod
     def _initalize_mapping():
@@ -56,7 +57,7 @@ class Symbolizer(object):
         return mapping
 
     def __call__(self):
-        self.perform_symbolizer_check()
+        self.perform_symbolization()
 
     def _get_files(self):
         """
@@ -69,7 +70,7 @@ class Symbolizer(object):
                 if file_.endswith('.py'):
                     yield "{0}/{1}".format(dirpath, file_)
 
-    def perform_symbolizer_check(self):  # pragma: no cover
+    def perform_symbolization(self):  # pragma: no cover
         """
         Cycle through python files, reading the contents and processing each
         line and writing out to the same file
@@ -102,9 +103,13 @@ class Symbolizer(object):
 
         :rtype: str
         """
-        new_line = self.pattern.sub(lambda x: self.mapping[x.group()], line)
+        new_line = self._pattern.sub(lambda x: self._mapping[x.group()], line)
         if line != new_line:
+            if self.handle_inline:
+                self._set_leading_whitespace(new_line)
             line = self._check_line_length(new_line)
+
+            self._reset_leading_whitespace()
 
         return line
 
@@ -123,26 +128,33 @@ class Symbolizer(object):
         if len(line) < self.column_width:
             return line
         else:
-            new_line = u''
             count = 0
-            first_line = []
-            second_line = []
+            first_line_lst = []
+            second_line_lst = []
             for item in line.split(','):
                 if count + len(item) < self.column_width:
-                    first_line.append(item)
+                    first_line_lst.append(item)
                     count += len(item)
                 else:
-                    second_line.append(item)
+                    second_line_lst.append(item)
 
-            if first_line and second_line:
-                new_line = ','.join(first_line).replace('=,', '=')
+            if first_line_lst and second_line_lst:
+                return self._build_stuff(first_line_lst, second_line_lst)
 
-                second_line = self._insert_pylint_disable(second_line)
-                new_line = '{0}\n{1}'.format(
-                    new_line, self._check_line_length(','.join(second_line))
-                )
+    def _build_stuff(self, first_line_lst, second_line_lst):
+        new_line = ','.join(first_line_lst)
 
-                return new_line
+        second_line_lst = self._insert_pylint_disable(second_line_lst)
+        second_line_lst = self._insert_leading_whitespace(
+            second_line_lst)
+
+        second_line = self._check_line_length(','.join(second_line_lst))
+        second_line = second_line.replace(u'disable=,', 'disable=')
+        new_line = '{0}\n{1}'.format(
+            new_line, second_line
+        )
+
+        return new_line
 
     def _insert_pylint_disable(self, line_list):
         """
@@ -153,12 +165,29 @@ class Symbolizer(object):
         :param type: list
         :rtype: list
         """
-        if not line_list[0].startswith(self.pylint_disable):
-            line_list.insert(0, self.pylint_disable)
+        if not line_list[0].startswith(self._pylint_disable):
+            line_list.insert(0, self._pylint_disable)
 
-            return line_list
+        return line_list
 
-    def _leading_whitespace(self, line):
+    def _insert_leading_whitespace(self, line_list):
+        """
+        If the handle_inline flag has been set and we have calculated
+        leading whitespace, insert the leading whitespace into the first
+        position of the list
+
+        :param line_list: List of string
+        :param type: list
+        :rtpe: list
+        """
+        if self.handle_inline and self._leading_whitespace:
+            line_list[0] = '{0}{1}'.format(
+                self._leading_whitespace, line_list[0]
+            )
+
+        return line_list
+
+    def _set_leading_whitespace(self, line):
         """
         Get the leading whitespace and append either four spaces to the
         whitespace or a tab for the next logical line
@@ -166,10 +195,16 @@ class Symbolizer(object):
         :param line: A string to with leading whitespace
         :rtype: str
         """
-        indentation = ' ' * 4
+        whitespace = u''
+        indentation = u''
 
-        whitespace = line[:-len(line.lstrip())]
-        if '\t' in whitespace:
-            indentation = '\t'
+        if line.index(self._pylint_disable):
+            indentation = ' ' * 4
+            whitespace = line[:-len(line.lstrip())]
+            if '\t' in whitespace:
+                indentation = '\t'
 
-        return whitespace + indentation
+        self._leading_whitespace = whitespace + indentation
+
+    def _reset_leading_whitespace(self):
+        self._leading_whitespace = 0
