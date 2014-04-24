@@ -8,8 +8,10 @@ TODO
 ----
 [ ] Handle things like `# -*- coding: utf-8 -*-` at the top of the file
 
-[ ] Handle inline disables
+[x] Handle inline disables
 
-[ ] Fix bug with trailing comma when adding a new line
+[x] Fix bug with trailing comma when adding a new line
 
 [ ] Cleanup `setup.py` and prep for PyPI
+
+[x] Update entry point for inlines
