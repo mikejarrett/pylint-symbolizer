@@ -1,19 +1,20 @@
 # -*- coding: utf8 -*-
+
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
-import symbolizer
+import pylint_symbolizer
 
 
-with open('README.md', 'rb') as readme:
+with open('README.rst', 'rb') as readme:
     long_description = readme.read()
 
 
 config = {
     'name': 'pylint_symbolizer',
-    'version': symbolizer.__version__,
+    'version': pylint_symbolizer.__version__,
     'author': 'Mike Jarrett',
     'author_email': 'mdj00m@gmail.com',
     'url': 'https://github.com/mikejarrett/pylint-symbolizer',
