@@ -121,27 +121,38 @@ class Symbolizer(object):
         :rtype: str
         """
         if len(line) < self.column_width:
-            return line
+            if line.endswith('\n'):
+                return line
+            else:
+                return u'{0}\n'.format(line)
+        elif u'class ' in line or u'def ' in line:
+            definition, lint = line.split(self._pylint_disable)
+
+            processed_lint = self._check_line_length(u'{0}{1}{2}'.format(
+                self._leading_whitespace, self._pylint_disable, lint
+            ))
+            return u'{0}\n{1}'.format(definition.rstrip(), processed_lint)
         else:
-            count = 0
-            first_line_lst = []
-            second_line_lst = []
-            for item in line.split(u','):
-                if count + len(item) < self.column_width:
-                    first_line_lst.append(item)
-                    count += len(item) + 1 # For commas
-                else:
-                    second_line_lst.append(item)
+            return self._process_line(line)
 
-            if first_line_lst and second_line_lst:
-                return self._build_new_line(first_line_lst, second_line_lst)
-            elif not first_line_lst and second_line_lst:
-                return self._fix_second_line_list(second_line_lst)
+    def _process_line(self, line):
+        count = 0
+        first_line_lst = []
+        second_line_lst = []
+        for item in line.split(u','):
+            if count + len(item) < self.column_width:
+                first_line_lst.append(item)
+                count += len(item) + 1 # For commas
+            else:
+                second_line_lst.append(item)
 
-        raise ValueError("Oops... not suppose to reach this point")
+        if first_line_lst and second_line_lst:
+            return self._build_new_line(first_line_lst, second_line_lst)
+        elif not first_line_lst and second_line_lst:
+            return self._fix_second_line_list(second_line_lst)
 
     def _build_new_line(self, first_line_lst, second_line_lst):
-        new_line = u','.join(first_line_lst)
+        new_line = u','.join(first_line_lst).rstrip()
 
         second_line_lst = self._insert_pylint_disable(second_line_lst)
         second_line_lst = self._insert_leading_whitespace(
@@ -160,7 +171,7 @@ class Symbolizer(object):
         for index, string in enumerate(second_line_lst):
             if self._pylint_disable in string:
                 code, lint = string.split(self._pylint_disable)
-                if 'class' in code or 'def' in code:
+                if u'class ' in code or u'def ' in code:
                     second_line_lst[index] = u'{0}\n'.format(code.rstrip())
                     second_line_lst.insert((index + 1), (u'{0}{1}{2}\n'.format(
                         self._leading_whitespace, self._pylint_disable,
@@ -175,9 +186,8 @@ class Symbolizer(object):
                     second_line_lst.insert(
                         (index + 1), u'{0}\n'.format(code.rstrip())
                     )
-                return u''.join(second_line_lst)
 
-        raise ValueError("Oops... not suppose to reach this point")
+        return u''.join(second_line_lst)
 
     def _insert_pylint_disable(self, line_list):
         """
