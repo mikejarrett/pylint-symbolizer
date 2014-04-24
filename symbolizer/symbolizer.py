@@ -115,7 +115,8 @@ class Symbolizer(object):
         disabled arguments for Pylint) and build a string verifying that it
         is still within the given column width.
 
-        Recursively calls itself until the line has been fully processed
+        Will be recursively called by helper functions until the line has
+        been processed and broken up properly
 
         :param line: A line of tet
         :rtype: str
@@ -136,6 +137,18 @@ class Symbolizer(object):
             return self._process_line(line)
 
     def _process_line(self, line):
+        """
+        Loops through each disabled symbolic name of form:
+            `# pylint: disable=too-many-lines,too-many-public-methods`
+
+        If the the disabled symbol can be added to the first_line_lst it
+        will be.
+        Else it will be added to the second_line_lst to be processed further
+
+        :param line: A string with pylint disable symbols
+        :param type: str
+        :rtpe: str
+        """
         count = 0
         first_line_lst = []
         second_line_lst = []
@@ -152,6 +165,16 @@ class Symbolizer(object):
             return self._fix_second_line_list(second_line_lst)
 
     def _build_new_line(self, first_line_lst, second_line_lst):
+        """
+        Processes the lists of strings and builds one long string that is
+        broken up by a new line character (current just `\n`)
+
+        :param first_line_lst: List of strings
+        :param type: list
+        :param second_line_lst: List of strings
+        :param type: list
+        :rtype: str
+        """
         new_line = u','.join(first_line_lst).rstrip()
 
         second_line_lst = self._insert_pylint_disable(second_line_lst)
@@ -168,16 +191,34 @@ class Symbolizer(object):
         return new_line
 
     def _fix_second_line_list(self, second_line_lst):
+        """
+        Given a list of strings. Determine where the pylint disable should
+        reside.
+
+        If it is a class or function definition, the disable line
+        should reside indented below the definition.
+
+        Else if it is an inline disable that is not inline with class or
+        function definition it should reside above that line of code
+
+        :param second_line_lst: List of strings
+        :param type: list
+        :rtype: str
+        """
         for index, string in enumerate(second_line_lst):
             if self._pylint_disable in string:
                 code, lint_ = string.split(self._pylint_disable)
                 if u'class ' in code or u'def ' in code:
+                    # If a class or function, split the lines and place the
+                    # newly indented pylint disable on the next line
                     second_line_lst[index] = u'{0}\n'.format(code.rstrip())
                     second_line_lst.insert((index + 1), (u'{0}{1}{2}\n'.format(
                         self._leading_whitespace, self._pylint_disable,
                         lint_
                     )))
                 else:
+                    # Insert the newly created pylint disable on the line above
+                    # the line with the inline disable
                     second_line_lst[index] = (u'{0}{1}{2}'.format(
                         self._get_whitespace(string),
                         self._pylint_disable,
@@ -243,7 +284,9 @@ class Symbolizer(object):
 
     @staticmethod
     def _get_whitespace(line):
+        """ Get the leading whitespace from a string """
         return line[:-len(line.lstrip())]
 
     def _reset_leading_whitespace(self):
-        self._leading_whitespace = 0
+        """ Reset leading whitespace to an empty string """
+        self._leading_whitespace = u''
