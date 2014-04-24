@@ -62,17 +62,23 @@ class Symbolizer(object):
 
         :yields: str (filepath)
         """
+
         for dirpath, __, filenames in os.walk(self.start_location):
             for file_ in filenames:
-                if file_.endswith(u'.py'):
-                    yield "{0}/{1}".format(dirpath, file_)
+                if file_.endswith('.py'):
+                    yield "{0}{1}".format(dirpath, file_)
 
     def perform_symbolization(self):  # pragma: no cover
         """
         Cycle through python files, reading the contents and processing each
         line and writing out to the same file
         """
-        for filename in self._get_files():
+        if os.path.isfile(self.start_location):
+            files = [self.start_location]
+        else:
+            files = self._get_files()
+
+        for filename in files:
             print u"Processing file -- {0}".format(filename)
             updated_file_text = u''
             with open(filename, 'r') as fin:
