@@ -65,7 +65,7 @@ Usage
 TODO
 ====
 
-[ ] Cleanup `setup.py` and prep for PyPI
+[x] Cleanup `setup.py` and prep for PyPI
 
 [ ] Handle things like `# -*- coding: utf-8 -*-` at the top of the file
 
