@@ -18,13 +18,13 @@ import mock
 
 from nose.tools import eq_ as assert_equals
 
-from symbolizer.symbolizer import Symbolizer
+from pylint_symbolizer.symbolizer import Symbolizer
 
 
-@mock.patch('symbolizer.symbolizer.os.walk')
+@mock.patch('pylint_symbolizer.symbolizer.os.walk')
 def test_get_files(os_walk):
     os_walk.return_value = [
-        ['dirpath', ['dir', 'names'], ['files.py', 'names.x']]
+        ['dirpath/', ['dir', 'names'], ['files.py', 'names.x']]
     ]
     for file_path in Symbolizer()._get_files():
         assert_equals(file_path, 'dirpath/files.py')
@@ -37,7 +37,7 @@ def test_insert_pylint_disable():
     assert_equals(ret_val, expected)
 
 
-@mock.patch('symbolizer.symbolizer.Symbolizer._check_line_length')
+@mock.patch('pylint_symbolizer.symbolizer.Symbolizer._check_line_length')
 def test_replace_id_with_symbol(check_length):
     expected = '# pylint: disable=too-many-lines'
     check_length.return_value = expected
@@ -94,7 +94,7 @@ def test_check_line_length_inline():
     assert_equals(ret_val, expected)
 
 
-@mock.patch('symbolizer.symbolizer.Symbolizer.perform_symbolization')
+@mock.patch('pylint_symbolizer.symbolizer.Symbolizer.perform_symbolization')
 def test_call(perform_symbolization):
     Symbolizer()()
     assert_equals(perform_symbolization.call_count, 1)
