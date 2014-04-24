@@ -87,7 +87,7 @@ def test_check_line_length_inline():
         "deprecated-module\n"
         "            # pylint: disable=too-many-lines,old-style-class,fixme"
     )
-    symb = Symbolizer(handle_inline=True)
+    symb = Symbolizer()
     symb._set_leading_whitespace(line)
     ret_val = symb._check_line_length(line)
     assert_equals(ret_val, expected)
@@ -97,3 +97,36 @@ def test_check_line_length_inline():
 def test_call(perform_symbolization):
     Symbolizer()()
     assert_equals(perform_symbolization.call_count, 1)
+
+
+def test_fix_second_line_list_not_class_nor_def():
+    line = (u'            self._template = Template(self.template)'
+            u'  # pylint: disable=attribute-defined-outside-init\n')
+    expected = (u'            # pylint: disable=attribute-defined-outside-init'
+                u'\n            self._template = Template(self.template)\n')
+
+    symb = Symbolizer()
+    ret_val = symb._fix_second_line_list([line])
+    assert_equals(ret_val, expected)
+
+
+def test_fix_second_line_list_not_class_nor_def():
+    line = (u'            self._template = Template(self.template)'
+            u'  # pylint: disable=attribute-defined-outside-init\n')
+    expected = (u'            # pylint: disable=attribute-defined-outside-init'
+                u'\n            self._template = Template(self.template)\n')
+
+    symb = Symbolizer()
+    ret_val = symb._fix_second_line_list([line])
+    assert_equals(ret_val, expected)
+
+def test_something():
+    line = '# pylint: disable=R0902,R0904,R0201,C0302,R0915,maybe-no-member'
+    expected = (
+        u'# pylint: disable=too-many-instance-attributes,too-many-public-method'
+        u's\n# pylint: disable=no-self-use,too-many-lines,too-many-statements'
+        u'\n# pylint: disable=maybe-no-member'
+    )
+    symb = Symbolizer()
+    ret_val = symb.replace_id_with_symbol(line)
+    assert_equals(ret_val, expected)

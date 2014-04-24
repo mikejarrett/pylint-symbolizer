@@ -14,4 +14,4 @@ TODO
 
 [ ] Cleanup `setup.py` and prep for PyPI
 
-[ ] Update entry point for inlines
+[x] Update entry point for inlines
