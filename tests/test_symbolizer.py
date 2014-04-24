@@ -130,12 +130,14 @@ def test_fix_second_line_list_with_def():
     ret_val = symb._check_line_length(line)
     assert_equals(ret_val, expected)
 
-def test_something():
+
+def test_a_lot_of_disables_with_some_already_changed_to_symbol():
     line = '# pylint: disable=R0902,R0904,R0201,C0302,R0915,maybe-no-member'
     expected = (
-        u'# pylint: disable=too-many-instance-attributes,too-many-public-method'
-        u's\n# pylint: disable=no-self-use,too-many-lines,too-many-statements'
-        u'\n# pylint: disable=maybe-no-member\n'
+        u'# pylint: disable=too-many-instance-attributes,'
+        u'too-many-public-methods\n'
+        u'# pylint: disable=no-self-use,too-many-lines,too-many-statements\n'
+        u'# pylint: disable=maybe-no-member\n'
     )
 
     symb = Symbolizer()
@@ -143,7 +145,7 @@ def test_something():
     assert_equals(ret_val, expected)
 
 
-def test_blah():
+def test_case_where_first_line_lst_may_not_be_generated():
     lines = [
         u'# pylint: disable=R0904,C0302,R0201,C1001,C0103,R0924\n',
         u'# -*- coding: utf8 -*-\n'

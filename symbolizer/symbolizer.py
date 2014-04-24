@@ -126,10 +126,10 @@ class Symbolizer(object):
             else:
                 return u'{0}\n'.format(line)
         elif u'class ' in line or u'def ' in line:
-            definition, lint = line.split(self._pylint_disable)
+            definition, lint_ = line.split(self._pylint_disable)
 
             processed_lint = self._check_line_length(u'{0}{1}{2}'.format(
-                self._leading_whitespace, self._pylint_disable, lint
+                self._leading_whitespace, self._pylint_disable, lint_
             ))
             return u'{0}\n{1}'.format(definition.rstrip(), processed_lint)
         else:
@@ -142,7 +142,7 @@ class Symbolizer(object):
         for item in line.split(u','):
             if count + len(item) < self.column_width:
                 first_line_lst.append(item)
-                count += len(item) + 1 # For commas
+                count += len(item) + 1  # For commas
             else:
                 second_line_lst.append(item)
 
@@ -170,18 +170,18 @@ class Symbolizer(object):
     def _fix_second_line_list(self, second_line_lst):
         for index, string in enumerate(second_line_lst):
             if self._pylint_disable in string:
-                code, lint = string.split(self._pylint_disable)
+                code, lint_ = string.split(self._pylint_disable)
                 if u'class ' in code or u'def ' in code:
                     second_line_lst[index] = u'{0}\n'.format(code.rstrip())
                     second_line_lst.insert((index + 1), (u'{0}{1}{2}\n'.format(
                         self._leading_whitespace, self._pylint_disable,
-                        lint
+                        lint_
                     )))
                 else:
                     second_line_lst[index] = (u'{0}{1}{2}'.format(
                         self._get_whitespace(string),
                         self._pylint_disable,
-                        lint
+                        lint_
                     ))
                     second_line_lst.insert(
                         (index + 1), u'{0}\n'.format(code.rstrip())
