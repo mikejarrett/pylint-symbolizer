@@ -1,6 +1,9 @@
 pylint-symbolizer
 =================
 
+.. image:: https://travis-ci.org/mikejarrett/pylint-symbolizer.svg?branch=master
+    :target: https://travis-ci.org/mikejarrett/pylint-symbolizer    
+
 Renames disabled Pylint IDs to Pylint symbolic names
 
 Requirements
