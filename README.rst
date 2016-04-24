@@ -14,7 +14,7 @@ Required
 
 ``python`` and the following module
 
-  - ``pylint>=1.2.0``
+  - ``pylint>=1.5.0``
 
 Optional
 --------
